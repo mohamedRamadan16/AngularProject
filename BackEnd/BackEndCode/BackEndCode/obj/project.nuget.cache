@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "RZ3qipPBD84=",
+  "success": true,
+  "projectFilePath": "D:\\Software Engineering\\ITI (9-Months)\\14- Angular\\Angular Project\\BackEnd\\BackEndCode\\BackEndCode\\BackEndCode.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Romio\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.5\\microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512",
+    "C:\\Users\\Romio\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
