@@ -1,0 +1,302 @@
+<section class="page-card">
+  <div class="section-header">
+    <div>
+      <p class="section-kicker">Connections</p>
+      <h2>Relations</h2>
+      <p class="section-subtext">
+        Choose one workflow at a time for cleaner assignment and grading.
+      </p>
+    </div>
+    <button class="btn-quiet" [disabled]="loading()" (click)="loadLookups()">Refresh</button>
+  </div>
+
+  @if (message()) {
+    <div class="inline-alert success">{{ message() }}</div>
+  }
+  @if (error()) {
+    <div class="inline-alert error">{{ error() }}</div>
+  }
+
+  <div class="relation-switcher" role="tablist" aria-label="Relation workflows">
+    <button
+      class="relation-mode-btn"
+      [class.active]="relationMode() === 'studentCourse'"
+      [disabled]="loading()"
+      (click)="setRelationMode('studentCourse')"
+    >
+      Student Course
+    </button>
+    <button
+      class="relation-mode-btn"
+      [class.active]="relationMode() === 'courseGrade'"
+      [disabled]="loading()"
+      (click)="setRelationMode('courseGrade')"
+    >
+      Course Grade
+    </button>
+    <button
+      class="relation-mode-btn"
+      [class.active]="relationMode() === 'studentDepartment'"
+      [disabled]="loading()"
+      (click)="setRelationMode('studentDepartment')"
+    >
+      Student Department
+    </button>
+    <button
+      class="relation-mode-btn"
+      [class.active]="relationMode() === 'courseDepartment'"
+      [disabled]="loading()"
+      (click)="setRelationMode('courseDepartment')"
+    >
+      Course Department
+    </button>
+  </div>
+
+  <article class="relation-workspace">
+    @if (relationMode() === 'courseDepartment') {
+      <h3>Course to Department</h3>
+      <p class="section-subtext">Link or unlink a course from a department.</p>
+
+      <div class="form-grid relation-form-grid">
+        <select
+          class="select-field"
+          [ngModel]="addCourseDepartmentForm().departmentId"
+          (ngModelChange)="
+            addCourseDepartmentForm.set({ ...addCourseDepartmentForm(), departmentId: $event })
+          "
+        >
+          <option value="">Choose department</option>
+          @for (dep of departments(); track dep.id) {
+            <option [value]="dep.id">{{ dep.name }}</option>
+          }
+        </select>
+
+        <select
+          class="select-field"
+          [ngModel]="addCourseDepartmentForm().courseId"
+          (ngModelChange)="
+            addCourseDepartmentForm.set({ ...addCourseDepartmentForm(), courseId: $event })
+          "
+        >
+          <option value="">Choose course</option>
+          @for (course of courses(); track course.id) {
+            <option [value]="course.id">{{ course.name }}</option>
+          }
+        </select>
+
+        <div class="relation-actions">
+          <button class="btn-brand" [disabled]="loading()" (click)="addCourseToDepartment()">
+            Add Link
+          </button>
+          <button class="btn-ghost" [disabled]="loading()" (click)="removeCourseFromDepartment()">
+            Remove Link
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (relationMode() === 'studentDepartment') {
+      <h3>Student to Department</h3>
+      <p class="section-subtext">Assign or remove a student department.</p>
+
+      <div class="form-grid relation-form-grid">
+        <select
+          class="select-field"
+          [ngModel]="studentDepartmentForm().studentId"
+          (ngModelChange)="
+            studentDepartmentForm.set({ ...studentDepartmentForm(), studentId: $event })
+          "
+        >
+          <option value="">Choose student</option>
+          @for (st of students(); track st.id) {
+            <option [value]="st.id">{{ st.fullName }}</option>
+          }
+        </select>
+
+        <select
+          class="select-field"
+          [ngModel]="studentDepartmentForm().departmentId"
+          (ngModelChange)="
+            studentDepartmentForm.set({ ...studentDepartmentForm(), departmentId: $event })
+          "
+        >
+          <option value="">Choose department</option>
+          @for (dep of departments(); track dep.id) {
+            <option [value]="dep.id">{{ dep.name }}</option>
+          }
+        </select>
+
+        <div class="relation-actions">
+          <button class="btn-brand" [disabled]="loading()" (click)="assignStudentToDepartment()">
+            Assign
+          </button>
+          <button class="btn-ghost" [disabled]="loading()" (click)="removeStudentFromDepartment()">
+            Remove
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (relationMode() === 'studentCourse') {
+      <h3>Student to Course</h3>
+      <p class="section-subtext">Enroll or remove with valid course options only.</p>
+
+      <div class="form-grid relation-form-grid">
+        <select
+          class="select-field"
+          [ngModel]="studentCourseForm().studentId"
+          (ngModelChange)="onStudentCourseStudentChange($event)"
+        >
+          <option value="">Choose student</option>
+          @for (st of students(); track st.id) {
+            <option [value]="st.id">{{ st.fullName }}</option>
+          }
+        </select>
+
+        <div class="relation-switcher compact">
+          <button
+            class="relation-mode-btn"
+            [class.active]="studentCourseAction() === 'assign'"
+            [disabled]="loading()"
+            (click)="setStudentCourseAction('assign')"
+          >
+            Assign
+          </button>
+          <button
+            class="relation-mode-btn"
+            [class.active]="studentCourseAction() === 'remove'"
+            [disabled]="loading()"
+            (click)="setStudentCourseAction('remove')"
+          >
+            Remove
+          </button>
+        </div>
+
+        @if (loadingStudentCourseOptions()) {
+          <p class="relation-hint">Loading course options...</p>
+        }
+
+        @if (!loadingStudentCourseOptions() && studentCourseForm().studentId) {
+          <select
+            class="select-field"
+            [ngModel]="studentCourseForm().courseId"
+            (ngModelChange)="studentCourseForm.set({ ...studentCourseForm(), courseId: $event })"
+          >
+            @if (studentCourseAction() === 'assign') {
+              <option value="">Choose course to assign</option>
+              @for (course of assignableCourses(); track course.courseId) {
+                <option [value]="course.courseId">{{ course.courseName }}</option>
+              }
+            } @else {
+              <option value="">Choose course to remove</option>
+              @for (course of removableCourses(); track course.courseId) {
+                <option [value]="course.courseId">{{ course.courseName }}</option>
+              }
+            }
+          </select>
+        }
+
+        @if (
+          !loadingStudentCourseOptions() &&
+          studentCourseForm().studentId &&
+          studentCourseAction() === 'assign' &&
+          assignableCourses().length === 0
+        ) {
+          <p class="relation-hint warning">No more courses available to assign for this student.</p>
+        }
+
+        @if (
+          !loadingStudentCourseOptions() &&
+          studentCourseForm().studentId &&
+          studentCourseAction() === 'remove' &&
+          removableCourses().length === 0
+        ) {
+          <p class="relation-hint warning">This student is not enrolled in any course.</p>
+        }
+
+        <div class="relation-actions">
+          @if (studentCourseAction() === 'assign') {
+            <button class="btn-brand" [disabled]="loading()" (click)="assignStudentToCourse()">
+              Assign
+            </button>
+          } @else {
+            <button class="btn-ghost" [disabled]="loading()" (click)="removeStudentFromCourse()">
+              Remove
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    @if (relationMode() === 'courseGrade') {
+      <h3>Course Grade</h3>
+      <p class="section-subtext">
+        Grades can be set only for courses where the student is enrolled.
+      </p>
+
+      <div class="form-grid relation-form-grid">
+        <select
+          class="select-field"
+          [ngModel]="gradeForm().studentId"
+          (ngModelChange)="onGradeStudentChange($event)"
+        >
+          <option value="">Choose student</option>
+          @for (st of students(); track st.id) {
+            <option [value]="st.id">{{ st.fullName }}</option>
+          }
+        </select>
+
+        @if (loadingStudentCourses()) {
+          <p class="relation-hint">Loading enrolled courses...</p>
+        }
+
+        @if (gradeForm().studentId && !loadingStudentCourses() && enrolledCourses().length === 0) {
+          <p class="relation-hint warning">This student is not enrolled in any course yet.</p>
+        }
+
+        @if (enrolledCourses().length > 0) {
+          <select
+            class="select-field"
+            [ngModel]="gradeForm().courseId"
+            (ngModelChange)="onGradeCourseChange($event)"
+          >
+            <option value="">Choose enrolled course</option>
+            @for (course of enrolledCourses(); track course.courseId) {
+              <option [value]="course.courseId">{{ course.courseName }}</option>
+            }
+          </select>
+
+          <input
+            class="number-field"
+            type="number"
+            step="0.01"
+            min="0"
+            max="100"
+            placeholder="Grade (0-100) or empty"
+            [ngModel]="gradeForm().grade"
+            (ngModelChange)="gradeForm.set({ ...gradeForm(), grade: $event })"
+          />
+
+          <div class="relation-actions">
+            <button class="btn-brand" [disabled]="loading()" (click)="updateStudentCourseGrade()">
+              Save Grade
+            </button>
+          </div>
+
+          <div class="enrollment-preview">
+            @for (course of enrolledCourses(); track course.courseId) {
+              <span>
+                {{ course.courseName }}
+                @if (course.grade !== null && course.grade !== undefined) {
+                  - {{ course.grade }}
+                } @else {
+                  - no grade
+                }
+              </span>
+            }
+          </div>
+        }
+      </div>
+    }
+  </article>
+</section>

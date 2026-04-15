@@ -1,0 +1,25 @@
+<nav class="topbar">
+  <div class="topbar-content">
+    <a class="brand" [routerLink]="homeRoute()">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-label">Campus Hub</span>
+    </a>
+
+    <div class="nav-links">
+      @if (isAdmin()) {
+        <a class="nav-link-pill" routerLink="/students" routerLinkActive="active">Students</a>
+        <a class="nav-link-pill" routerLink="/departments" routerLinkActive="active">Departments</a>
+        <a class="nav-link-pill" routerLink="/courses" routerLinkActive="active">Courses</a>
+        <a class="nav-link-pill" routerLink="/relations" routerLinkActive="active">Relations</a>
+      } @else if (isStudent()) {
+        <a class="nav-link-pill" routerLink="/courses" routerLinkActive="active">My Courses</a>
+      }
+    </div>
+
+    @if (!isLoggedIn()) {
+      <a class="auth-btn" routerLink="/login">Login</a>
+    } @else {
+      <button class="auth-btn logout" (click)="logout()">Logout</button>
+    }
+  </div>
+</nav>

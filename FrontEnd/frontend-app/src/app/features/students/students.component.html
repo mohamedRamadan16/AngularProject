@@ -1,0 +1,123 @@
+<section class="page-card">
+  <div class="section-header">
+    <div>
+      <p class="section-kicker">Directory</p>
+      <h2>Students</h2>
+    </div>
+    <button class="btn-quiet" [disabled]="loading()" (click)="load()">Refresh</button>
+  </div>
+
+  @if (message()) {
+    <div class="inline-alert success">{{ message() }}</div>
+  }
+  @if (error()) {
+    <div class="inline-alert error">{{ error() }}</div>
+  }
+
+  <div class="form-grid grid-2">
+    <input
+      class="field"
+      placeholder="Full name"
+      [ngModel]="form().fullName"
+      (ngModelChange)="form.set({ ...form(), fullName: $event })"
+    />
+
+    <input
+      class="field"
+      type="email"
+      placeholder="Email"
+      [ngModel]="form().email"
+      (ngModelChange)="form.set({ ...form(), email: $event })"
+    />
+
+    <select
+      class="select-field"
+      [ngModel]="form().departmentId"
+      (ngModelChange)="form.set({ ...form(), departmentId: $event })"
+    >
+      <option value="">No department</option>
+      @for (department of departments(); track department.id) {
+        <option [value]="department.id">{{ department.name }}</option>
+      }
+    </select>
+
+    <button class="btn-brand" [disabled]="loading()" (click)="create()">Create Student</button>
+  </div>
+
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of students(); track item.id) {
+          <tr>
+            <td>{{ item.id }}</td>
+
+            @if (editStudentId() === item.id) {
+              <td>
+                <input
+                  class="field"
+                  [ngModel]="editForm().fullName"
+                  (ngModelChange)="editForm.set({ ...editForm(), fullName: $event })"
+                />
+              </td>
+              <td>
+                <input
+                  class="field"
+                  type="email"
+                  [ngModel]="editForm().email"
+                  (ngModelChange)="editForm.set({ ...editForm(), email: $event })"
+                />
+              </td>
+              <td>
+                <select
+                  class="select-field"
+                  [ngModel]="editForm().departmentId"
+                  (ngModelChange)="editForm.set({ ...editForm(), departmentId: $event })"
+                >
+                  <option value="">No department</option>
+                  @for (department of departments(); track department.id) {
+                    <option [value]="department.id">{{ department.name }}</option>
+                  }
+                </select>
+              </td>
+            } @else {
+              <td>{{ item.fullName }}</td>
+              <td>{{ item.email }}</td>
+              <td>{{ item.departmentName ?? 'none' }}</td>
+            }
+
+            <td>
+              @if (editStudentId() === item.id) {
+                <button class="btn-brand" [disabled]="loading()" (click)="saveEdit(item.id)">
+                  Save
+                </button>
+                <button class="btn-ghost" [disabled]="loading()" (click)="cancelEdit()">
+                  Cancel
+                </button>
+              } @else {
+                <button class="btn-ghost" [disabled]="loading()" (click)="beginEdit(item)">
+                  Edit
+                </button>
+                <button class="btn-danger" [disabled]="loading()" (click)="remove(item.id)">
+                  Delete
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty-cell" colspan="5">No students found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

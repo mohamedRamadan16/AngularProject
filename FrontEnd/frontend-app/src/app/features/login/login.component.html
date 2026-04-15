@@ -1,0 +1,32 @@
+<section class="login-shell">
+  <div class="login-panel">
+    <p class="section-kicker">Administration</p>
+    <h2>Welcome Back</h2>
+
+    @if (error()) {
+      <div class="inline-alert error">{{ error() }}</div>
+    }
+
+    <div class="form-grid">
+      <input
+        class="field"
+        type="email"
+        placeholder="Email"
+        [ngModel]="form().email"
+        (ngModelChange)="form.set({ ...form(), email: $event })"
+      />
+
+      <input
+        class="field"
+        type="password"
+        placeholder="Password"
+        [ngModel]="form().password"
+        (ngModelChange)="form.set({ ...form(), password: $event })"
+      />
+
+      <button class="btn-brand" [disabled]="loading()" (click)="login()">
+        {{ loading() ? 'Signing In...' : 'Login' }}
+      </button>
+    </div>
+  </div>
+</section>

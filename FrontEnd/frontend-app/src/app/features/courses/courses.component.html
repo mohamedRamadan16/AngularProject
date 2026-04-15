@@ -1,0 +1,126 @@
+<section class="page-card">
+  <div class="section-header">
+    <div>
+      @if (isAdmin()) {
+        <p class="section-kicker">Curriculum</p>
+        <h2>Courses</h2>
+      } @else {
+        <p class="section-kicker">Student Portal</p>
+        <h2>My Courses</h2>
+        <p class="section-subtext">View your enrollment status and current grades.</p>
+      }
+    </div>
+    <button class="btn-quiet" [disabled]="loading()" (click)="load()">Refresh</button>
+  </div>
+
+  @if (message()) {
+    <div class="inline-alert success">{{ message() }}</div>
+  }
+  @if (error()) {
+    <div class="inline-alert error">{{ error() }}</div>
+  }
+
+  @if (isAdmin()) {
+    <div class="form-grid grid-course">
+      <input
+        class="field"
+        placeholder="Course name"
+        [ngModel]="form().name"
+        (ngModelChange)="form.set({ ...form(), name: $event })"
+      />
+
+      <input
+        class="number-field"
+        type="number"
+        placeholder="Credit hours"
+        [ngModel]="form().creditHours"
+        (ngModelChange)="form.set({ ...form(), creditHours: +$event })"
+      />
+
+      <button class="btn-brand" [disabled]="loading()" (click)="create()">Create Course</button>
+    </div>
+  }
+
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          @if (isAdmin()) {
+            <th>ID</th>
+          }
+          <th>Name</th>
+          <th>Credit Hours</th>
+          @if (isAdmin()) {
+            <th>Action</th>
+          } @else {
+            <th>Enrollment</th>
+            <th>Grade</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (isAdmin()) {
+          @for (item of courses(); track item.id) {
+            <tr>
+              <td>{{ item.id }}</td>
+
+              @if (editCourseId() === item.id) {
+                <td>
+                  <input
+                    class="field"
+                    [ngModel]="editForm().name"
+                    (ngModelChange)="editForm.set({ ...editForm(), name: $event })"
+                  />
+                </td>
+                <td>
+                  <input
+                    class="number-field"
+                    type="number"
+                    [ngModel]="editForm().creditHours"
+                    (ngModelChange)="editForm.set({ ...editForm(), creditHours: +$event })"
+                  />
+                </td>
+                <td>
+                  <button class="btn-brand" [disabled]="loading()" (click)="saveEdit(item.id)">
+                    Save
+                  </button>
+                  <button class="btn-ghost" [disabled]="loading()" (click)="cancelEdit()">
+                    Cancel
+                  </button>
+                </td>
+              } @else {
+                <td>{{ item.name }}</td>
+                <td>{{ item.creditHours }}</td>
+                <td>
+                  <button class="btn-ghost" [disabled]="loading()" (click)="beginEdit(item)">
+                    Edit
+                  </button>
+                  <button class="btn-danger" [disabled]="loading()" (click)="remove(item.id)">
+                    Delete
+                  </button>
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty-cell" colspan="4">No courses found.</td>
+            </tr>
+          }
+        } @else {
+          @for (item of studentCourses(); track item.courseId) {
+            <tr>
+              <td>{{ item.courseName }}</td>
+              <td>{{ item.creditHours }}</td>
+              <td>{{ item.isEnrolled ? 'Enrolled' : 'Not enrolled' }}</td>
+              <td>{{ item.grade ?? 'Not graded yet' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty-cell" colspan="4">No course data available.</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

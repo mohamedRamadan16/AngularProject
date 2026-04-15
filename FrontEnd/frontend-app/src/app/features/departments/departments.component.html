@@ -1,0 +1,80 @@
+<section class="page-card">
+  <div class="section-header">
+    <div>
+      <p class="section-kicker">Structure</p>
+      <h2>Departments</h2>
+    </div>
+    <button class="btn-quiet" [disabled]="loading()" (click)="load()">Refresh</button>
+  </div>
+
+  @if (message()) {
+    <div class="inline-alert success">{{ message() }}</div>
+  }
+  @if (error()) {
+    <div class="inline-alert error">{{ error() }}</div>
+  }
+
+  <div class="form-grid grid-compact">
+    <input
+      class="field"
+      placeholder="Department name"
+      [ngModel]="form().name"
+      (ngModelChange)="form.set({ name: $event })"
+    />
+
+    <button class="btn-brand" [disabled]="loading()" (click)="create()">Create Department</button>
+  </div>
+
+  <div class="table-shell">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of departments(); track item.id) {
+          <tr>
+            <td>{{ item.id }}</td>
+
+            @if (editDepartmentId() === item.id) {
+              <td>
+                <input
+                  class="field"
+                  [ngModel]="editName()"
+                  (ngModelChange)="editName.set($event)"
+                />
+              </td>
+            } @else {
+              <td>{{ item.name }}</td>
+            }
+
+            <td>
+              @if (editDepartmentId() === item.id) {
+                <button class="btn-brand" [disabled]="loading()" (click)="saveEdit(item.id)">
+                  Save
+                </button>
+                <button class="btn-ghost" [disabled]="loading()" (click)="cancelEdit()">
+                  Cancel
+                </button>
+              } @else {
+                <button class="btn-ghost" [disabled]="loading()" (click)="beginEdit(item)">
+                  Edit
+                </button>
+                <button class="btn-danger" [disabled]="loading()" (click)="remove(item.id)">
+                  Delete
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty-cell" colspan="3">No departments found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

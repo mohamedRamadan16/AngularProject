@@ -1,6 +1,0 @@
-@BackEndCode_HostAddress = http://localhost:5228
-
-GET {{BackEndCode_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
